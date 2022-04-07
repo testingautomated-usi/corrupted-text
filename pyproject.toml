@@ -1,11 +1,14 @@
 [tool.poetry]
-name = "foo"
-version = "0.1.0"
-description = ""
-authors = ["Viktor Persson <viktor.persson@arcsin.se>"]
+name = "corrupted-text"
+version = "0.0.1"
+description = "Test input prioritizers implemented as part of our ISSTA 2022 paper 'Simple Techniques Work Surprisingly Well for Neural Network Test Prioritization and Active Learning '"
+authors = ["Michael Weiss <michael.weiss@usi.ch>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
+polyleven = "0.7" # Fast levenshtein distance implementation
+numpy = "^1.16.4"
+datasets = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
