@@ -323,11 +323,15 @@ class TextCorruptor(object):
             badge_start += batch_size
 
         print("Starting corruption")
+        tqdm_bar = tqdm(total=len(badges))
         with ThreadPoolExecutor() as executor:
-            futures = executor.map(_corrupt_badge, badges)
-            # TODO this changes order. need to fix
+            futures = {executor.submit(_corrupt_badge, badge): badge for badge in badges}
             for future in concurrent.futures.as_completed(futures):
-                print("badge done")
+                url = futures[future]
+                # print("bla")
+                tqdm_bar.update(1)
+            # TODO this changes order. need to fix
+            #     print("badge done")
                 corrupted_texts = []
         # corrupted_texts = list(itertools.chain.from_iterable(badge_res))
 
@@ -415,7 +419,7 @@ if __name__ == '__main__':
     #     , seed=4)
 
     imdb_text = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='test')['text']
-    imdb_text = imdb_text[:500]
+    imdb_text = imdb_text[:5000]
     imdb_corrupted = corruptor.corrupt(
         imdb_text, severity=0.5, seed=1
     )
