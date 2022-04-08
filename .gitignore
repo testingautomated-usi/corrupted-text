@@ -8,3 +8,5 @@ __pycache__/
 *$py.class
 .python-version
 poetry.lock
+/corrupted_text/.text_corruption_cache/
+/corrupted_text/.gen/
