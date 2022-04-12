@@ -9,6 +9,7 @@ import logging
 import os
 import pickle
 import re
+import shutil
 import string
 import tempfile
 import urllib
@@ -24,7 +25,7 @@ from tqdm import tqdm
 DEFAULT_CACHE_DIR = "./.text_corruption_cache/"
 
 MAX_COMMON_START_FOR_AUTOCOMPLETE = 5
-MIN_COMMON_START_FOR_AUTOCOMPLETE = 2
+MIN_COMMON_START_FOR_AUTOCOMPLETE = 3
 
 # TODO Replace with own github link (after acceptance), for security reasons and to avoid going offline
 THESAURUS_DOWNLOAD = "https://raw.githubusercontent.com/zaibacu/thesaurus/master/en_thesaurus.jsonl"
@@ -48,7 +49,7 @@ def _levensthein_distance(word: str, words: List[str]) -> np.ndarray:
     return res
 
 
-def _split_by_whitespace(strings: List[str]) -> List[List[str]]:
+def split_by_whitespace(strings: List[str]) -> List[List[str]]:
     """Splits a list of strings on whitespaces."""
     # using same regex as huggingface WhitespaceSplit
     # (see: https://huggingface.co/docs/tokenizers/python/latest/components.html)
@@ -65,14 +66,25 @@ def bad_autocompletes(word: str,
         return None
 
     common_letters = min(common_letters, len(word))
+    start = word[:common_letters]
 
-    res = start_bags[common_letters].get(word[:common_letters])
-    if res is None or (len(res) == 1 and res[0] == word):
-        # Gracefully handle case where no words start with the selected number of same letters
+    try:
+        bag = start_bags[common_letters][start]
+    except KeyError:
+        bag = []
+
+    # Remove the word itself
+    try:
+        bag = [w for w in bag if w != word]
+    except ValueError:
+        pass
+
+    # Handle no-match-found by checking fewer common letters
+    if len(bag) == 0:
+        # Gracefully handle case where no other words start with the selected number of same letters
         return bad_autocompletes(word, start_bags, common_letters=common_letters - 1)
-    if word in res:
-        res.remove(word)
-    return res
+
+    return bag
 
 
 class CorruptionType(enum.Enum):
@@ -103,10 +115,10 @@ def _get_rng(seed):
 @dataclasses.dataclass
 class CorruptionWeights:
     """Configuration of the weights of the different corruption types."""
-    typo_weight: float = 0.1
+    typo_weight: float = 0.05
     autocomplete_weight: float = 0.30
     autocorrect_weight: float = 0.30
-    synonym_weight: float = 0.30
+    synonym_weight: float = 0.35
 
 
 def _generate_corruption_types(seed: int,
@@ -140,19 +152,22 @@ class TextCorruptor(object):
 
     def __init__(self,
                  base_dataset: List[str],
-                 cache_dir: str = DEFAULT_CACHE_DIR,
-                 dictionary_size: int = 4000):
+                 cache_dir: Optional[str] = DEFAULT_CACHE_DIR,
+                 dictionary_size: int = 4000,
+                 clear_cache: bool = False):
         if cache_dir is DEFAULT_CACHE_DIR:
             warnings.warn("Using default cache directory, which is probably not what you want. "
                           "Consider passing your own cache dir when creating a "
                           "TextCorruptor instance. ")
 
         # Identifier of passed dataset
-        self.base_ds_hash: str = _hash_text_to_str(base_dataset)
+        self.base_ds_hash: str = _hash_text_to_str(base_dataset + [str(dictionary_size)])
         # If cache dir is None: no caching
         self.cache_dir: Optional[str] = None
         if cache_dir is not None:
             self.cache_dir = os.path.join(cache_dir, self.base_ds_hash)
+            if clear_cache:
+                shutil.rmtree(self.cache_dir)
             if not os.path.exists(self.cache_dir):
                 os.makedirs(self.cache_dir)
 
@@ -174,7 +189,7 @@ class TextCorruptor(object):
 
         # Split on whitespaces
         logging.debug("[WORD EXTRACTION] Splitting dataset on whitespaces")
-        words = _split_by_whitespace(base_dataset)
+        words = split_by_whitespace(base_dataset)
         # Flatten samples and make lower case
         logging.debug("[WORD EXTRACTION] Flattening samples and making lower case")
         words = [w.lower() for l in words for w in l]
@@ -267,6 +282,7 @@ class TextCorruptor(object):
                 severity: float,
                 seed: int,
                 weights: Optional[CorruptionWeights] = None,
+                force_recalculate: bool = False
                 ) -> List[str]:
         """Corrupts a dataset consisting of a list of strings (texts).
 
@@ -302,7 +318,7 @@ class TextCorruptor(object):
         if self.cache_dir is not None:
             ds_hash = _hash_text_to_str(texts)
             cache_file = os.path.join(self.cache_dir, "corrupted", f"{ds_hash}-{severity}-{seed}.pkl")
-            if os.path.exists(cache_file):
+            if os.path.exists(cache_file) and not force_recalculate:
                 logging.info("Loading corrupted dataset from cache")
                 with open(cache_file, 'rb') as f:
                     return pickle.load(f)
@@ -313,7 +329,7 @@ class TextCorruptor(object):
         assert 0 <= severity <= 1, "Severity must be between 0 and 1"
 
         def _corrupt_single_text(words: List[str]) -> str:
-            """Parallelizable corruption job for a single dataset entry (text)."""
+            """Corruption job for a single dataset entry (text)."""
             new_text = []
 
             # Seed which is independent of the order and number of texts in dataset
@@ -341,7 +357,7 @@ class TextCorruptor(object):
 
             return " ".join(new_text)
 
-        texts_as_words = _split_by_whitespace(texts)
+        texts_as_words = split_by_whitespace(texts)
         corrupted_texts = []
         for i, text in tqdm(enumerate(texts_as_words), total=len(texts_as_words),
                             desc="Corrupting dataset badges"):
@@ -456,6 +472,7 @@ def print_corruptions(self, text: str, seed: int):
     for severity, corrupted in all_texts.items():
         print(f"{round(severity, 1)}& {corrupted[0]}\\\\")
     print()
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
