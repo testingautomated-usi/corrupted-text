@@ -1,6 +1,7 @@
 import logging
 from typing import List
 
+import numpy as np
 from datasets import load_dataset
 
 from corrupted_text import text_corruptor
@@ -24,6 +25,13 @@ def test_imdb():
 
     hashes = [text_corruptor._hash_text_to_str(text) for text in nominal_test]
     assert hashes == _imdb_hashes()
+
+    print("Printing Examples which are shown in the Readme.md.")
+    nominal_sentence = ["The movie was terrible. The actors were great, but I did not like the ending. " \
+                        "I will never watch this movie again."]
+    for sev in np.arange(0, 1.1, 0.2):
+        c = corruptor.corrupt(nominal_sentence, severity=sev, seed=1)
+        print(c[0])
 
 
 def _imdb_hashes() -> List[str]:

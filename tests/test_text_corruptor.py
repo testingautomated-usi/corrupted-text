@@ -199,7 +199,7 @@ def test_common_words():
 
     c_500_new = text_corruptor.TextCorruptor(
         base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=500, cache_dir=None)
+        dictionary_size=500)
     assert c_500.common_words == c_500_new.common_words
 
     very_frequent = ["frequent"] * 10000

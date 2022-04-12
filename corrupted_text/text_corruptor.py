@@ -166,9 +166,10 @@ class TextCorruptor(object):
         self.cache_dir: Optional[str] = None
         if cache_dir is not None:
             self.cache_dir = os.path.join(cache_dir, self.base_ds_hash)
-            if clear_cache:
-                shutil.rmtree(self.cache_dir)
             if not os.path.exists(self.cache_dir):
+                os.makedirs(self.cache_dir)
+            elif clear_cache:
+                shutil.rmtree(self.cache_dir)
                 os.makedirs(self.cache_dir)
 
         self.common_words: List[str] = self._extract_common_words(base_dataset, dictionary_size)
@@ -461,27 +462,14 @@ class TextCorruptor(object):
             raise ValueError(f"Unknown corruption type: {corruption_type}")
 
 
-# TODO move to a separate file
-def print_corruptions(self, text: str, seed: int):
-    """Visualizes corruptions by printing the passed text at various corruption levels."""
-    all_texts = dict()
-    for severity in np.arange(0, 1.2, 0.2):
-        all_texts[severity] = self.corrupt([text], seed=seed, severity=severity)
-
-    print(f"0& {text}\\\\")
-    for severity, corrupted in all_texts.items():
-        print(f"{round(severity, 1)}& {corrupted[0]}\\\\")
-    print()
-
-
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     nominal_train = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='train')['text']
     nominal_test = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='test')['text']
-    corruptor = TextCorruptor(base_dataset=nominal_test + nominal_train)
+    corruptor = TextCorruptor(base_dataset=nominal_test + nominal_train,  cache_dir=".imdb_test")
 
     # Run only on a part of the dataset
-    nominal_test = nominal_test[:201]
+    # nominal_test = nominal_test[:201]
     imdb_corrupted = corruptor.corrupt(
         nominal_test, severity=0.5, seed=1
     )
