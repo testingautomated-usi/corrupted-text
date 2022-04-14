@@ -120,6 +120,9 @@ class CorruptionWeights:
     autocorrect_weight: float = 0.30
     synonym_weight: float = 0.35
 
+    def __hash__(self):
+        return hash(tuple(dataclasses.asdict(self).values()))
+
 
 def _generate_corruption_types(seed: int,
                                num_words: int,
@@ -319,7 +322,11 @@ class TextCorruptor(object):
 
         if self.cache_dir is not None:
             ds_hash = _hash_text_to_str(texts)
-            cache_file = os.path.join(self.cache_dir, "corrupted", f"{ds_hash}-{severity}-{seed}.pkl")
+            cache_file = os.path.join(
+                self.cache_dir,
+                "corrupted",
+                f"{ds_hash}-{hash(weights)}-{severity}-{seed}.pkl"
+            )
             if os.path.exists(cache_file) and not force_recalculate:
                 logging.info("Loading corrupted dataset from cache")
                 with open(cache_file, 'rb') as f:
@@ -467,7 +474,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     nominal_train = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='train')['text']
     nominal_test = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='test')['text']
-    corruptor = TextCorruptor(base_dataset=nominal_test + nominal_train,  cache_dir=".imdb_test")
+    corruptor = TextCorruptor(base_dataset=nominal_test + nominal_train, cache_dir=".imdb_test")
 
     # Run only on a part of the dataset
     # nominal_test = nominal_test[:201]
