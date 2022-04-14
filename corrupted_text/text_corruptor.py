@@ -311,10 +311,11 @@ class TextCorruptor(object):
             severity: Probability of a character being replaced by a random character.
             seed: Seed to control randomness.
             weights: Weights for each corruption type.
+            force_recalculate: Ignore previously corrupted and cached result.
 
         """
 
-        assert 0 <= severity <= 1, "Severity must be between 0 and 1."
+        assert 0 <= severity <= 1., "Severity must be between 0 and 1."
 
         if self.cache_dir is not None:
             ds_hash = _hash_text_to_str(texts)
