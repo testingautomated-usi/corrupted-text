@@ -9,7 +9,9 @@ from corrupted_text.text_corruptor import TextCorruptor
 
 
 def test_imdb():
-    """Tests the IMDB dataset, which is the go-to example for our corruptor"""
+    """Tests the IMDB dataset, which is the go-to example for our corruptor.
+
+    This takes quite a while to run."""
 
     logging.basicConfig(level=logging.INFO)
     nominal_train = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='train')['text']

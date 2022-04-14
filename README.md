@@ -22,8 +22,9 @@ from [WordNet](https://wordnet.princeton.edu/), ignoring the context.
 This mimicks dictionary based translations, which are often wrong as they ignore context. 
 4. **Typo** A single letter is replaced with another, randomly chosen letter.
 
-To any word, at most one corruption is applied.
-The severity (`]0, 1]`) is a parameter to steer which corruptions should be applied.
+To any word, at most one corruption is applied, i.e., corruptions are not applied on top of each other.
+
+The severity (`]0, 1]`) is a parameter to steer how many corruptions should be applied.
 It roughly corresponds to the percentage of words that should be corrupted
 (only *rougly* as not all bad autocompletion attempts are successful, and as sometimes, 
 the bad synonyms consist of multiple words, thus extending the number of words in the text).
