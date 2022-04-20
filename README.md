@@ -3,9 +3,9 @@
 ![test](https://github.com/vikpe/python-package-starter/workflows/test/badge.svg?branch=master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
-[![Docstr-Coverage](https://badgen.net/badge/docstr-coverage/100%25/green)](https://github.com/HunterMcGushion/docstr_coverage)
+[![Docstr-Coverage](https://badgen.net/badge/docstr-coverage/100%25/green?cache=30)](https://github.com/HunterMcGushion/docstr_coverage)
 [![Python Version](https://img.shields.io/pypi/pyversions/corrupted-text)](https://img.shields.io/pypi/pyversions/corrupted-text)
-[![PyPi Deployment](https://badgen.net/pypi/v/corrupted-text)](https://pypi.org/project/corrupted-text/)
+[![PyPi Deployment](https://badgen.net/pypi/v/corrupted-text?cache=30)](https://pypi.org/project/corrupted-text/)
 
 A python library to generate out-of-distribution text datasets.
 Specifically, the library applies **model-independent**, **commonplace corruptions** 
@@ -63,7 +63,7 @@ You'll need python >= 3.7
 Usage is very straigthforward.
 The following shows an example on how to corrupt the imdb sentiment classification dataset.
 
-You can also run the example in colab: <a class="reference external" href="https://colab.research.google.com/github/testingautomated-usi/corrupted-text/blob/jupyter_example/imdb_example.ipynb"><img alt="Run Example in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
+You can also run the example in colab: <a class="reference external" href="https://colab.research.google.com/github/testingautomated-usi/corrupted-text/blob/main/imdb_example.ipynb"><img alt="Run Example in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 
 
 ```python
