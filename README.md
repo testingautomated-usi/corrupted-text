@@ -19,7 +19,7 @@ This mimicks wrong autocompletion.
 If no common word with at least 3 common start letters is found, a bad autocorrection is attempted instead.
 3. **Bad Synonym** Words are replaced with a synonym, accoring to a naive, flat mapping extracted 
 from [WordNet](https://wordnet.princeton.edu/), ignoring the context. 
-This mimicks dictionary based translations, which are often wrong as they ignore context. 
+This mimicks dictionary based translations, which are often wrong.
 4. **Typo** A single letter is replaced with another, randomly chosen letter.
 
 To any word, at most one corruption is applied, i.e., corruptions are not applied on top of each other.
