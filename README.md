@@ -52,8 +52,7 @@ Clearly, the higher the chosen corruption severity, the lower the model accuracy
 
 It's as simple as `pip install corrupted-text`. 
 
-You'll need python 3.6 <= x <= 3.9.
-
+You'll need python >= 3.7
 
 
 ## Usage

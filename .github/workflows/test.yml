@@ -14,7 +14,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[lint]
       - run: black . --check
-      - run: flake8
       - run: isort docstr_coverage tests --check-only --profile black
 
   test:
