@@ -397,10 +397,14 @@ class TextCorruptor(object):
                     corrupt_word = self._corrupt_word(word, word_seed, corruption)
                     new_text.append(corrupt_word)
 
-            corrupted =  " ".join(new_text)
+            corrupted = " ".join(new_text)
             # Fix some of the most common spacing problems which occur from our word merging.
-            return corrupted.replace(" .", ".").replace(" ?", "?").replace(" !", "!").replace(" ,", ",")
-
+            return (
+                corrupted.replace(" .", ".")
+                .replace(" ?", "?")
+                .replace(" !", "!")
+                .replace(" ,", ",")
+            )
 
         texts_as_words = split_by_whitespace(texts)
         corrupted_texts = []
