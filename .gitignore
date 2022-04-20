@@ -14,3 +14,4 @@ poetry.lock
 /corrupted_text/.imdb_test
 /build/
 /.mycache/
+/pypi_deploy.sh
