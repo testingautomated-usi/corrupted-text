@@ -12,3 +12,4 @@ poetry.lock
 /corrupted_text/.gen/
 /tests/.text_corruption_cache
 /corrupted_text/.imdb_test
+/build/

@@ -6,7 +6,13 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/corrupted-text)](https://img.shields.io/pypi/pyversions/corrupted-text)
 [![PyPi Deployment](https://badgen.net/pypi/v/corrupted-text)](https://pypi.org/project/corrupted-text/)
 
-## Corruptions
+A dataset to generate out-of-dataset dataset for an arbitrary (english) text sets.
+Specifically, the library applies **model-independent**, **commonplace corruptions** 
+(not model-specific, worst-case adversarial corruptions).
+We thus aim to allow benchmark-studies regarding robustness against **realistic outliers**.
+
+
+## Implemented Corruptions
 
 Most corruptions are based on a set of *common words*, to which a corruptor is fitted. These *common words* may be
 domain specific and thus, the corruptor can be fitted with a *base dataset* from which the most common words are
@@ -34,8 +40,6 @@ multiple words, thus extending the number of words in the text).
 
 Optionally, users can define weights to each corruption type, steering how often they should be applied.
 
-## Example
-
 ## Accuracies
 
 The following shows the accuracy of a regular, simple transformer model on the imdb sentiment classification dataset.
@@ -55,6 +59,7 @@ You'll need python >= 3.7
 
 ## Usage
 
+Usage is very straigthforward.
 The following shows an example on how to corrupt the imdb sentiment classification dataset.
 
 ```python
@@ -65,7 +70,7 @@ from datasets import load_dataset # pip install datasets
 # Enable Detailed Logging
 logging.basicConfig(level=logging.INFO)
 
-# Load the dataset (we use huggingface-datasets, but any list of strings is fine.
+# Load the dataset (we use huggingface-datasets, but any list of strings is fine).
 nominal_train = load_dataset("imdb", split="train")["text"]
 nominal_test = load_dataset("imdb", split="test")["text"]
 
@@ -79,14 +84,17 @@ imdb_corrupted = corruptor.corrupt(nominal_test, severity=0.5, seed=1)
 ```
 
 ## Citation
-```bibtex
-@inproceedings{weiss2022simpleTip,
-  title={Simple Techniques Work Surprisingly Well for Neural Network Test Prioritization and Active Learning (Replication Paper)},
-  author={Weiss, Michael and Paolo, Tonella},
-  booktitle={Proceedings of the 31st ACM SIGSOFT International Symposium on Software Testing and Analysis},
-  year={2022}
-}
 
-```
+    @inproceedings{Weiss2022SimpleTip, 
+      title={Simple Techniques Work Surprisingly Well for Neural Network Test Prioritization and Active Learning (Replication Paper)},
+      author={Weiss, Michael and Paolo, Tonella}, 
+      booktitle={Proceedings of the 31st ACM SIGSOFT International Symposium on Software Testing and Analysis},
+      year={2022}
+    }
+
 ## Other Corrupted Datasets
 
+- [MNIST-C](https://github.com/google-research/mnist-c) by Mu and Gilmer
+- [CIFAR-10-C](https://zenodo.org/record/2535967#.YmAC7nVBy8I) by Hendrycks and Dietterich
+- [Imagenet-C](https://zenodo.org/record/2235448) by Hendrycks and Dietterich
+- [Fashion-MNIST-C](https://github.com/testingautomated-usi/fashion-mnist-c) by Weiss and Tonella (i.e., same as `corrupted-text`)
