@@ -26,7 +26,7 @@ setup(
     packages=["corrupted_text"],
     install_requires=[
         "polyleven==0.7",  # Fast levenshtein distance implementation
-        "numpy>=1.16.4"
+        "numpy>=1.16.4",
     ],
     extras_require={
         "lint": ["flake8==3.8.2", "black==22.3.0", "isort==5.6.4"],
