@@ -29,7 +29,12 @@ setup(
         "numpy>=1.16.4",
     ],
     extras_require={
-        "lint": ["flake8==3.8.2", "black==22.3.0", "isort==5.6.4", "docstr-coverage==2.2.0"],
+        "lint": [
+            "flake8==3.8.2",
+            "black==22.3.0",
+            "isort==5.6.4",
+            "docstr-coverage==2.2.0",
+        ],
         "test": ["pytest>=6.2.5", "datasets>=1.0.0"],
         "acc_measurement": ["datasets>=1.0.0", "tensorflow>=2.6.0"],
     },
