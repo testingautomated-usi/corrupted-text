@@ -23,7 +23,7 @@ setup(
     author="Michael Weiss",
     author_email="michael.weiss@usi.ch",
     license="MIT",
-    packages=["corrupted-text"],
+    packages=["corrupted_text"],
     install_requires=[
         "python>=3.6.2",
         "polyleven==0.7",  # Fast levenshtein distance implementation
