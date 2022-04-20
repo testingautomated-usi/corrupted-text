@@ -27,9 +27,8 @@ DEFAULT_CACHE_DIR = "./.text_corruption_cache/"
 MAX_COMMON_START_FOR_AUTOCOMPLETE = 5
 MIN_COMMON_START_FOR_AUTOCOMPLETE = 3
 
-# TODO Replace with own github link (after acceptance), for security reasons and to avoid going offline
 THESAURUS_DOWNLOAD = (
-    "https://raw.githubusercontent.com/zaibacu/thesaurus/master/en_thesaurus.jsonl"
+    "https://raw.githubusercontent.com/testingautomated-usi/corrupted-text/blob/main/en_thesaurus.jsonl"
 )
 
 
