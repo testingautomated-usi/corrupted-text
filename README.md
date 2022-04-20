@@ -3,6 +3,7 @@
 ![test](https://github.com/vikpe/python-package-starter/workflows/test/badge.svg?branch=master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Docstr-Coverage](https://badgen.net/badge/docstr-coverage/100%25/green)](https://github.com/HunterMcGushion/docstr_coverage)
 [![Python Version](https://img.shields.io/pypi/pyversions/corrupted-text)](https://img.shields.io/pypi/pyversions/corrupted-text)
 [![PyPi Deployment](https://badgen.net/pypi/v/corrupted-text)](https://pypi.org/project/corrupted-text/)
 

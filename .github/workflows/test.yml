@@ -15,6 +15,7 @@ jobs:
           pip install -e .[lint]
       - run: black . --check
       - run: isort docstr_coverage tests --check-only --profile black
+      - run: docstr-coverage
 
   test:
     runs-on: ${{ matrix.os }}
