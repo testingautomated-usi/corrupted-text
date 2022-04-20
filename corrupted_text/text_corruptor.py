@@ -27,7 +27,7 @@ DEFAULT_CACHE_DIR = "./.text_corruption_cache/"
 MAX_COMMON_START_FOR_AUTOCOMPLETE = 5
 MIN_COMMON_START_FOR_AUTOCOMPLETE = 3
 
-THESAURUS_DOWNLOAD = "https://raw.githubusercontent.com/testingautomated-usi/corrupted-text/blob/main/en_thesaurus.jsonl"
+THESAURUS_DOWNLOAD = "https://raw.githubusercontent.com/testingautomated-usi/corrupted-text/main/resources/en_thesaurus.json"
 
 
 def _levensthein_distance(word: str, words: List[str]) -> np.ndarray:
