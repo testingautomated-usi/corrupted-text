@@ -13,3 +13,4 @@ poetry.lock
 /tests/.text_corruption_cache
 /corrupted_text/.imdb_test
 /build/
+/.mycache/

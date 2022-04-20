@@ -67,7 +67,7 @@ You can also run the example in colab: <a class="reference external" href="https
 
 
 ```python
-import corrupted_text # pip install corrupted-text
+from corrupted_text import text_corruptor # pip install corrupted-text
 import logging 
 from datasets import load_dataset # pip install datasets
 
@@ -80,8 +80,8 @@ nominal_test = load_dataset("imdb", split="test")["text"]
 
 # Fit a corruptor (we fit on the training and test set,
 #   but as this takes a while, you'd want to choose a smaller subset for larger datasets)
-corruptor = corrupted_text.TextCorruptor(base_dataset=nominal_test + nominal_train,
-                                         cache_dir="/mycache")
+corruptor = text_corruptor.TextCorruptor(base_dataset=nominal_test + nominal_train,
+                                         cache_dir=".mycache")
 
 # Corrupt the test set with severity 0.5. The result is again a list of corrupted strings.
 imdb_corrupted = corruptor.corrupt(nominal_test, severity=0.5, seed=1)

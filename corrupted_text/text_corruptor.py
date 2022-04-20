@@ -397,14 +397,17 @@ class TextCorruptor(object):
                     corrupt_word = self._corrupt_word(word, word_seed, corruption)
                     new_text.append(corrupt_word)
 
-            return " ".join(new_text)
+            corrupted =  " ".join(new_text)
+            # Fix some of the most common spacing problems which occur from our word merging.
+            return corrupted.replace(" .", ".").replace(" ?", "?").replace(" !", "!").replace(" ,", ",")
+
 
         texts_as_words = split_by_whitespace(texts)
         corrupted_texts = []
         for i, text in tqdm(
             enumerate(texts_as_words),
             total=len(texts_as_words),
-            desc="Corrupting dataset badges",
+            desc="Corrupting dataset",
         ):
             corrupted_texts.append(_corrupt_single_text(text))
 
