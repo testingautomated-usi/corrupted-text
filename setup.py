@@ -40,12 +40,5 @@ setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Topic :: Documentation",
-        "Topic :: Documentation :: Sphinx",
-        "Topic :: Software Development",
-        "Topic :: Software Development :: Documentation",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Topic :: Software Development :: Quality Assurance",
-        "Topic :: Utilities",
     ],
 )
