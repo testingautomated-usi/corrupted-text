@@ -1,4 +1,1 @@
-__all__ = [
-    "TextCorruptor",
-    "CorruptionWeights"
-]
+__all__ = ["TextCorruptor", "CorruptionWeights"]
