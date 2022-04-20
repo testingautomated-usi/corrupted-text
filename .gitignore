@@ -13,9 +13,5 @@ poetry.lock
 /tests/.text_corruption_cache
 /corrupted_text/.imdb_test
 /build/
+/.mycache/
 /pypi_deploy.sh
-/corrupted_text/.text_corruption_cache/
-/corrupted_text/.gen/
-/tests/.text_corruption_cache
-/corrupted_text/.imdb_test
-/build/

@@ -63,8 +63,11 @@ You'll need python >= 3.7
 Usage is very straigthforward.
 The following shows an example on how to corrupt the imdb sentiment classification dataset.
 
+You can also run the example in colab: <a class="reference external" href="https://colab.research.google.com/github/testingautomated-usi/corrupted-text/blob/jupyter_example/imdb_example.ipynb"><img alt="Run Example in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
+
+
 ```python
-import corrupted_text # pip install corrupted-text
+import corrupted_text  # pip install corrupted-text
 import logging 
 from datasets import load_dataset # pip install datasets
 
@@ -78,7 +81,7 @@ nominal_test = load_dataset("imdb", split="test")["text"]
 # Fit a corruptor (we fit on the training and test set,
 #   but as this takes a while, you'd want to choose a smaller subset for larger datasets)
 corruptor = corrupted_text.TextCorruptor(base_dataset=nominal_test + nominal_train,
-                                         cache_dir="/mycache")
+                                         cache_dir=".mycache")
 
 # Corrupt the test set with severity 0.5. The result is again a list of corrupted strings.
 imdb_corrupted = corruptor.corrupt(nominal_test, severity=0.5, seed=1)
