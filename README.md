@@ -1,50 +1,101 @@
-# Python Package Starter
-![test](https://github.com/vikpe/python-package-starter/workflows/test/badge.svg?branch=master) [![codecov](https://codecov.io/gh/vikpe/python-package-starter/branch/master/graph/badge.svg)](https://codecov.io/gh/vikpe/python-package-starter) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+# Corrupted-Text: Realistic Out-of-Distribution Texts
 
-## Features
-* Multi python version support ([pyenv](https://github.com/pyenv/pyenv), [tox](https://github.com/tox-dev/tox/))
-* Single config using the new standardized `pyproject.toml` ([PEP518](https://www.python.org/dev/peps/pep-0518/))
-* Simple build/publish/dependency management using [poetry](https://github.com/sdispater/poetry)
-* Continous integration ([GitHub Actions](https://help.github.com/en/actions))
-* Code coverage reporting ([Codecov](https://codecov.io/))
-* Code formatting ([black](https://github.com/psf/black))
+![test](https://github.com/vikpe/python-package-starter/workflows/test/badge.svg?branch=master)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Docstr-Coverage](https://badgen.net/badge/docstr-coverage/100%25/green)](https://github.com/HunterMcGushion/docstr_coverage)
+[![Python Version](https://img.shields.io/pypi/pyversions/corrupted-text)](https://img.shields.io/pypi/pyversions/corrupted-text)
+[![PyPi Deployment](https://badgen.net/pypi/v/corrupted-text)](https://pypi.org/project/corrupted-text/)
 
-## Prerequisites
-* [pyenv](https://github.com/pyenv/pyenv) (for automatic installation use [pyenv-installer](https://github.com/pyenv/pyenv-installer))
-* [poetry](https://github.com/sdispater/poetry)
+A dataset to generate out-of-dataset dataset for an arbitrary (english) text sets.
+Specifically, the library applies **model-independent**, **commonplace corruptions** 
+(not model-specific, worst-case adversarial corruptions).
+We thus aim to allow benchmark-studies regarding robustness against **realistic outliers**.
+
+
+## Implemented Corruptions
+
+Most corruptions are based on a set of *common words*, to which a corruptor is fitted. These *common words* may be
+domain specific and thus, the corruptor can be fitted with a *base dataset* from which the most common words are
+extracted.
+
+Then, the following corruptions are randomly applied on a per-word basis:
+
+1. **Bad Autocorrection**
+   Words are replaced with another, common word to which it has a small levenshtein distance. This mimicks wrong
+   autocorrection, as for example done by "intelligent" mobile phone keyboards.
+2. **Bad Autocompletion**
+   Words are replaced with another, common word with the same starting letters. This mimicks wrong autocompletion. If no
+   common word with at least 3 common start letters is found, a bad autocorrection is attempted instead.
+3. **Bad Synonym** Words are replaced with a synonym, accoring to a naive, flat mapping extracted
+   from [WordNet](https://wordnet.princeton.edu/), ignoring the context. This mimicks dictionary based translations,
+   which are often wrong.
+4. **Typo** A single letter is replaced with another, randomly chosen letter.
+
+To any word, at most one corruption is applied, i.e., corruptions are not applied on top of each other.
+
+The severity `]0, 1]` is a parameter to steer how many corruptions should be applied. It roughly corresponds to the
+percentage of words that should be corrupted
+(only *rougly* as not all bad autocompletion attempts are successful, and as sometimes, the bad synonyms consist of
+multiple words, thus extending the number of words in the text).
+
+Optionally, users can define weights to each corruption type, steering how often they should be applied.
+
+## Accuracies
+
+The following shows the accuracy of a regular, simple transformer model on the imdb sentiment classification dataset.
+Clearly, the higher the chosen corruption severity, the lower the model accuracy.
+
+| *Severity* | 0 (*) | 0.1 | 0.3 | 0.5 | 0.7 | 0.9  | 1 (max!) |  
+|------------|-------|-----|-----|-----|-----|------|----------|
+| *Accuracy* | .87   | .81 | .78 | .75 | .71 | 0.66 | 0.64     |  
+
+(*) No corruption, original test set.
 
 ## Installation
-1. Install [pyenv](https://github.com/pyenv/pyenv).
-2. Install the Python versions you want to support using `pyenv`.
-  ```sh
-  pyenv install 3.6.9
-  pyenv install 3.8.0
-  ```
-3. Clone repo: `git clone git@github.com:vikpe/python-package-starter.git [PACKAGE_NAME]` 
-4. `cd [PACKAGE NAME]`
-5. Create a virtual env: `pyenv virtualenv 3.8.0 foo38`
-6. Activate virtual env: `pyenv activate foo38`
-7. Install poetry: `pip install poetry`
-8. Install dependencies: `poetry install`
-9. Edit `pyproject.toml`, update project name, description and author and any other settings you like.
+
+It's as simple as `pip install corrupted-text`.
+
+You'll need python >= 3.7
 
 ## Usage
 
-Command | Description
---- | ---
-`poetry add [package]` | Add package to dependencies.
-`poetry add -D [package]` | Add package to dev dependencies.
-`poetry run pytest` | Run tests in local Python version.
-`poetry run ptw tests foo --clear` | Watch for file changes and run tests in local Python version.
-`poetry run tox` | Run tests in all Python versions defined in `tox.ini`.
-`poetry run black .` | Run black code formatter.
-`poetry build` | Build sdist and wheel to `/dist`.
-`poetry publish` | Publish package to PyPi.
+Usage is very straigthforward.
+The following shows an example on how to corrupt the imdb sentiment classification dataset.
 
-## Continous integration
+```python
+import corrupted_text # pip install corrupted-text
+import logging 
+from datasets import load_dataset # pip install datasets
 
-### GitHub Actions
-Tests are run whenever there is a commit, see `.github/workflows/test.yml` for details.
+# Enable Detailed Logging
+logging.basicConfig(level=logging.INFO)
 
-### Code coverage
-Enable code coverage reporting to [Codecov](https://codecov.io/) by creating a secret with name `CODECOV_TOKEN` in your repository settings (Settings -> Secrets -> New sectret) and value set to the token created by Codecov.
+# Load the dataset (we use huggingface-datasets, but any list of strings is fine).
+nominal_train = load_dataset("imdb", split="train")["text"]
+nominal_test = load_dataset("imdb", split="test")["text"]
+
+# Fit a corruptor (we fit on the training and test set,
+#   but as this takes a while, you'd want to choose a smaller subset for larger datasets)
+corruptor = corrupted_text.TextCorruptor(base_dataset=nominal_test + nominal_train,
+                                         cache_dir="/mycache")
+
+# Corrupt the test set with severity 0.5. The result is again a list of corrupted strings.
+imdb_corrupted = corruptor.corrupt(nominal_test, severity=0.5, seed=1)
+```
+
+## Citation
+
+    @inproceedings{Weiss2022SimpleTip, 
+      title={Simple Techniques Work Surprisingly Well for Neural Network Test Prioritization and Active Learning (Replication Paper)},
+      author={Weiss, Michael and Paolo, Tonella}, 
+      booktitle={Proceedings of the 31st ACM SIGSOFT International Symposium on Software Testing and Analysis},
+      year={2022}
+    }
+
+## Other Corrupted Datasets
+
+- [MNIST-C](https://github.com/google-research/mnist-c) by Mu and Gilmer
+- [CIFAR-10-C](https://zenodo.org/record/2535967#.YmAC7nVBy8I) by Hendrycks and Dietterich
+- [Imagenet-C](https://zenodo.org/record/2235448) by Hendrycks and Dietterich
+- [Fashion-MNIST-C](https://github.com/testingautomated-usi/fashion-mnist-c) by Weiss and Tonella (i.e., same as `corrupted-text`)
