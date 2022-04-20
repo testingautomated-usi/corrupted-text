@@ -27,10 +27,10 @@ DEFAULT_CACHE_DIR = "./.text_corruption_cache/"
 MAX_COMMON_START_FOR_AUTOCOMPLETE = 5
 MIN_COMMON_START_FOR_AUTOCOMPLETE = 3
 
-# TODO Replace with own github link (after acceptance), for security reasons and to avoid going offline
-THESAURUS_DOWNLOAD = (
-    "https://raw.githubusercontent.com/zaibacu/thesaurus/master/en_thesaurus.jsonl"
-)
+# Original Source and credits: "https://raw.githubusercontent.com/zaibacu/thesaurus/master/en_thesaurus.jsonl",
+# based on Wordnet.
+# (mirrored in our own repo to make sure it remains online)
+THESAURUS_DOWNLOAD = "https://raw.githubusercontent.com/testingautomated-usi/corrupted-text/main/resources/en_thesaurus.json"
 
 
 def _levensthein_distance(word: str, words: List[str]) -> np.ndarray:

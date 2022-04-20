@@ -7,7 +7,7 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/corrupted-text)](https://img.shields.io/pypi/pyversions/corrupted-text)
 [![PyPi Deployment](https://badgen.net/pypi/v/corrupted-text)](https://pypi.org/project/corrupted-text/)
 
-A dataset to generate out-of-dataset dataset for an arbitrary (english) text sets.
+A python library to generate out-of-distribution text datasets.
 Specifically, the library applies **model-independent**, **commonplace corruptions** 
 (not model-specific, worst-case adversarial corruptions).
 We thus aim to allow benchmark-studies regarding robustness against **realistic outliers**.
@@ -29,7 +29,7 @@ Then, the following corruptions are randomly applied on a per-word basis:
    common word with at least 3 common start letters is found, a bad autocorrection is attempted instead.
 3. **Bad Synonym** Words are replaced with a synonym, accoring to a naive, flat mapping extracted
    from [WordNet](https://wordnet.princeton.edu/), ignoring the context. This mimicks dictionary based translations,
-   which are often wrong.
+   which are often wrong. This assumes that you are using an english-language dataset.
 4. **Typo** A single letter is replaced with another, randomly chosen letter.
 
 To any word, at most one corruption is applied, i.e., corruptions are not applied on top of each other.
