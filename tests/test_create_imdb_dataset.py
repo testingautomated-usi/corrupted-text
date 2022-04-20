@@ -14,8 +14,8 @@ def test_imdb():
     This takes quite a while to run."""
 
     logging.basicConfig(level=logging.INFO)
-    nominal_train = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='train')['text']
-    nominal_test = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='test')['text']
+    nominal_train = load_dataset('imdb', split='train')['text']
+    nominal_test = load_dataset('imdb', split='test')['text']
 
     corruptor = TextCorruptor(base_dataset=nominal_test + nominal_train)
 
