@@ -1,5 +1,8 @@
 name: IMDB hash check
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+      - 'main'
 
 jobs:
   lint:
