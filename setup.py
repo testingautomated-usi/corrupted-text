@@ -25,7 +25,6 @@ setup(
     license="MIT",
     packages=["corrupted_text"],
     install_requires=[
-        "python>=3.6.2",
         "polyleven==0.7",  # Fast levenshtein distance implementation
         "numpy>=1.16.4"
     ],
