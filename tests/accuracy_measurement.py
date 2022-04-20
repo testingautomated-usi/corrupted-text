@@ -22,7 +22,9 @@ INPUT_MAXLEN = 300
 class TransformerBlock(keras.layers.Layer):
     def __init__(self, embed_dim, num_heads, ff_dim, rate=0.1):
         super(TransformerBlock, self).__init__()
-        self.att = keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim)
+        self.att = keras.layers.MultiHeadAttention(
+            num_heads=num_heads, key_dim=embed_dim
+        )
         self.ffn = keras.Sequential(
             [
                 keras.layers.Dense(ff_dim, activation="relu"),
@@ -46,7 +48,9 @@ class TransformerBlock(keras.layers.Layer):
 class TokenAndPositionEmbedding(keras.layers.Layer):
     def __init__(self, maxlen, vocab_size, embed_dim):
         super(TokenAndPositionEmbedding, self).__init__()
-        self.token_emb = keras.layers.Embedding(input_dim=vocab_size, output_dim=embed_dim)
+        self.token_emb = keras.layers.Embedding(
+            input_dim=vocab_size, output_dim=embed_dim
+        )
         self.pos_emb = keras.layers.Embedding(input_dim=maxlen, output_dim=embed_dim)
 
     def call(self, x):
@@ -62,13 +66,13 @@ if __name__ == "__main__":
     #
     # CREATE CORRUPTED DATASETS
     #
-    train_ds = load_dataset('imdb', split='train')
-    x_train, y_train = train_ds['text'], train_ds['label']
+    train_ds = load_dataset("imdb", split="train")
+    x_train, y_train = train_ds["text"], train_ds["label"]
 
-    test_ds = load_dataset('imdb', split='test')
-    x_test, y_test = test_ds['text'], test_ds['label']
+    test_ds = load_dataset("imdb", split="test")
+    x_test, y_test = test_ds["text"], test_ds["label"]
 
-    corruptor = TextCorruptor(train_ds['text'])
+    corruptor = TextCorruptor(train_ds["text"])
 
     # In parallel we create corrupted datasets (and keep them on file system)
     with ProcessPoolExecutor(max_workers=2) as executor:
@@ -93,12 +97,13 @@ if __name__ == "__main__":
     x_train = tokenizer.texts_to_sequences(x_train)
     x_test = tokenizer.texts_to_sequences(x_test)
 
-    x_train = tf.keras.preprocessing.sequence.pad_sequences(x_train, maxlen=INPUT_MAXLEN)
+    x_train = tf.keras.preprocessing.sequence.pad_sequences(
+        x_train, maxlen=INPUT_MAXLEN
+    )
     x_test = tf.keras.preprocessing.sequence.pad_sequences(x_test, maxlen=INPUT_MAXLEN)
 
     y_train = tf.keras.utils.to_categorical(y_train)
     y_test = tf.keras.utils.to_categorical(y_test)
-
 
     try:
         model = keras.models.load_model(MEASUREMENT_MODEL_PATH)
@@ -119,7 +124,9 @@ if __name__ == "__main__":
         outputs = tf.keras.layers.Dense(2, activation="softmax")(x)
 
         model = tf.keras.Model(inputs=inputs, outputs=outputs)
-        model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+        model.compile(
+            optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        )
 
         model.fit(x_train, y_train, batch_size=32, epochs=10, verbose=1)
         model.save(MEASUREMENT_MODEL_PATH)

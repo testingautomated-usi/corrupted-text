@@ -8,12 +8,15 @@ from corrupted_text import text_corruptor
 from tests import dummy_dataset
 
 
-@pytest.mark.parametrize("word, words, expected", [
-    ("hello", ["hello"], [0]),
-    ("hello", ["hell", "hel"], [1, 2]),
-    ("hello", ["pello"], [1]),
-    ("hello", ["rrrrr"], [5]),
-])
+@pytest.mark.parametrize(
+    "word, words, expected",
+    [
+        ("hello", ["hello"], [0]),
+        ("hello", ["hell", "hel"], [1, 2]),
+        ("hello", ["pello"], [1]),
+        ("hello", ["rrrrr"], [5]),
+    ],
+)
 def test__levensthein_distance(word, words, expected):
     """Test levensthein distance."""
     # Using a library for levensthein distance,
@@ -23,16 +26,20 @@ def test__levensthein_distance(word, words, expected):
     assert actual.shape == (len(words),)
 
 
-@pytest.mark.parametrize("strings, expected", [
-    (["hello world"], [["hello", "world"]]),
-    (["hello world", "hello world"], [["hello", "world"], ["hello", "world"]]),
-    (
-            ["""this is 
-        multiline """],
-            [["this", "is", "multiline"]]
-
-    )
-])
+@pytest.mark.parametrize(
+    "strings, expected",
+    [
+        (["hello world"], [["hello", "world"]]),
+        (["hello world", "hello world"], [["hello", "world"], ["hello", "world"]]),
+        (
+            [
+                """this is 
+        multiline """
+            ],
+            [["this", "is", "multiline"]],
+        ),
+    ],
+)
 def test__split_by_whitespace(strings: List[str], expected: List[List[str]]):
     """Split texts by whitespace."""
     assert text_corruptor.split_by_whitespace(strings) == expected
@@ -41,29 +48,50 @@ def test__split_by_whitespace(strings: List[str], expected: List[List[str]]):
 def test_bad_autocompletes():
     """Choice of works with the same start."""
     bags_of_words = dict()
-    bags_of_words[5] = {"mywor": ["mywor2", "mywor3", "mywor4", "myword5"],
-                        "other": ["otherW2", "otherW3"]}
+    bags_of_words[5] = {
+        "mywor": ["mywor2", "mywor3", "mywor4", "myword5"],
+        "other": ["otherW2", "otherW3"],
+    }
 
-    bags_of_words[4] = {"mywo": ["mywor2", "mywor3", "mywor4", "myword5"],
-                        "othe": ["otherW2", "otherW3"]}
+    bags_of_words[4] = {
+        "mywo": ["mywor2", "mywor3", "mywor4", "myword5"],
+        "othe": ["otherW2", "otherW3"],
+    }
     bags_of_words[4]["smal"] = ["smalt", "smalp"]
     # No additional test data for 3
-    bags_of_words[3] = {"myw": ["mywor2", "mywor3", "mywor4", "myword5"],
-                        "oth": ["otherW2", "otherW3"],
-                        "sma": ["smalt", "smalp", "sma234"]}
+    bags_of_words[3] = {
+        "myw": ["mywor2", "mywor3", "mywor4", "myword5"],
+        "oth": ["otherW2", "otherW3"],
+        "sma": ["smalt", "smalp", "sma234"],
+    }
 
     # For simplicity, I do not create bags for every word (e.g. for mywor2, ...)
     # in this test
 
     # Exact match
-    assert text_corruptor.bad_autocompletes("mywor", bags_of_words, 5) == bags_of_words[5]["mywor"]
+    assert (
+        text_corruptor.bad_autocompletes("mywor", bags_of_words, 5)
+        == bags_of_words[5]["mywor"]
+    )
     # Longer input
-    assert text_corruptor.bad_autocompletes("myword", bags_of_words, 4) == bags_of_words[4]["mywo"]
+    assert (
+        text_corruptor.bad_autocompletes("myword", bags_of_words, 4)
+        == bags_of_words[4]["mywo"]
+    )
     # Shorter input
-    assert text_corruptor.bad_autocompletes("myw", bags_of_words, 4) == bags_of_words[3]["myw"]
-    assert text_corruptor.bad_autocompletes("small1", bags_of_words, 4) == bags_of_words[4]["smal"]
+    assert (
+        text_corruptor.bad_autocompletes("myw", bags_of_words, 4)
+        == bags_of_words[3]["myw"]
+    )
+    assert (
+        text_corruptor.bad_autocompletes("small1", bags_of_words, 4)
+        == bags_of_words[4]["smal"]
+    )
     # Test checks in smaller if not available
-    assert text_corruptor.bad_autocompletes("small1", bags_of_words, 5) == bags_of_words[4]["smal"]
+    assert (
+        text_corruptor.bad_autocompletes("small1", bags_of_words, 5)
+        == bags_of_words[4]["smal"]
+    )
     # Test input word is not in result
     assert "mywor2" not in text_corruptor.bad_autocompletes("mywor2", bags_of_words, 3)
     # Test too short, nonexisting input word (i.e., end of recursion, no match found)
@@ -122,54 +150,63 @@ def test_corruption_weights():
 
 def _clean_cache(ds: List[str], dict_size: int):
     cache_dir = text_corruptor.TextCorruptor(
-        base_dataset=ds,
-        dictionary_size=dict_size).cache_dir
+        base_dataset=ds, dictionary_size=dict_size
+    ).cache_dir
     shutil.rmtree(cache_dir)
 
 
 def test_text_corruptor_is_deterministic_for_same_instance():
     _clean_cache(dummy_dataset.SMALL_TRAIN_DATA, 500)
     corruptor = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=500)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=500
+    )
 
     c1 = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=0)
-    c1_recalc = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=0, force_recalculate=True)
+    c1_recalc = corruptor.corrupt(
+        dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=0, force_recalculate=True
+    )
     assert c1 == c1_recalc, "The same seed should produce the same result"
 
     c3 = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=1)
     assert c1 != c3, "Different seeds should produce different results"
     # Double check with force recalc, to make sure result
-    c3_recalc = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=1, force_recalculate=True)
+    c3_recalc = corruptor.corrupt(
+        dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=1, force_recalculate=True
+    )
     assert c1 != c3, "Different seeds should produce different results"
     assert c3 == c3_recalc, "The same seed should produce the same result"
 
     # Make sure length of input set does not influence the individual entry result
     sublist_size = 10
-    c4 = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA[:sublist_size], severity=0.8, seed=0, force_recalculate=True)
+    c4 = corruptor.corrupt(
+        dummy_dataset.SMALL_TEST_DATA[:sublist_size],
+        severity=0.8,
+        seed=0,
+        force_recalculate=True,
+    )
     assert c1[:sublist_size] == c4, "The input length should not influence the result"
 
 
 def test_text_corruptor_is_deterministic_for_new_instance():
     _clean_cache(dummy_dataset.SMALL_TRAIN_DATA, 500)
     corruptor = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=500)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=500
+    )
 
     c1 = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=0)
 
     # Make sure re-creating the corruptor does not change anything
     corruptor = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=500)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=500
+    )
     c5 = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=0)
     assert c1 == c5, "Re-creating corruptor instance (with cache) influenced output."
 
     # Same without cache
     shutil.rmtree(corruptor.cache_dir)
     corruptor = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=500)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=500
+    )
     c6 = corruptor.corrupt(dummy_dataset.SMALL_TEST_DATA, severity=0.8, seed=0)
     assert c1 == c6, "Re-creating corruptor instance (without cache) influenced output."
 
@@ -179,12 +216,12 @@ def test_common_words():
     _clean_cache(dummy_dataset.SMALL_TRAIN_DATA, 100)
 
     c_100 = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=100)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=100
+    )
 
     c_500 = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=500)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=500
+    )
 
     assert len(c_100.common_words) == 100
     assert len(c_500.common_words) == 500
@@ -193,21 +230,20 @@ def test_common_words():
     # Check determinism
     _clean_cache(dummy_dataset.SMALL_TRAIN_DATA, 100)
     c_100_new = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=100)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=100
+    )
     assert c_100.common_words == c_100_new.common_words
 
     c_500_new = text_corruptor.TextCorruptor(
-        base_dataset=dummy_dataset.SMALL_TRAIN_DATA,
-        dictionary_size=500)
+        base_dataset=dummy_dataset.SMALL_TRAIN_DATA, dictionary_size=500
+    )
     assert c_500.common_words == c_500_new.common_words
 
     very_frequent = ["frequent"] * 10000
     very_rare = ["suPerbStrangWord"] * 1
 
     ds = dummy_dataset.SMALL_TEST_DATA + very_frequent + very_rare
-    c_30_test = text_corruptor.TextCorruptor(
-        base_dataset=ds, dictionary_size=30)
+    c_30_test = text_corruptor.TextCorruptor(base_dataset=ds, dictionary_size=30)
     assert len(c_30_test.common_words) == 30
     assert very_frequent[0] in c_30_test.common_words
     assert very_rare[0] not in c_30_test.common_words

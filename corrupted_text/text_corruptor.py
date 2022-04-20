@@ -15,7 +15,7 @@ import tempfile
 import urllib
 import warnings
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import numpy as np
 import polyleven
@@ -28,7 +28,9 @@ MAX_COMMON_START_FOR_AUTOCOMPLETE = 5
 MIN_COMMON_START_FOR_AUTOCOMPLETE = 3
 
 # TODO Replace with own github link (after acceptance), for security reasons and to avoid going offline
-THESAURUS_DOWNLOAD = "https://raw.githubusercontent.com/zaibacu/thesaurus/master/en_thesaurus.jsonl"
+THESAURUS_DOWNLOAD = (
+    "https://raw.githubusercontent.com/zaibacu/thesaurus/master/en_thesaurus.jsonl"
+)
 
 
 def _levensthein_distance(word: str, words: List[str]) -> np.ndarray:
@@ -53,12 +55,12 @@ def split_by_whitespace(strings: List[str]) -> List[List[str]]:
     """Splits a list of strings on whitespaces."""
     # using same regex as huggingface WhitespaceSplit
     # (see: https://huggingface.co/docs/tokenizers/python/latest/components.html)
-    return [re.findall(r'\w+|[^\w\s]+', l) for l in strings]
+    return [re.findall(r"\w+|[^\w\s]+", l) for l in strings]
 
 
-def bad_autocompletes(word: str,
-                      start_bags: Dict[int, Dict[str, List[str]]],
-                      common_letters: int) -> Optional[List[str]]:
+def bad_autocompletes(
+    word: str, start_bags: Dict[int, Dict[str, List[str]]], common_letters: int
+) -> Optional[List[str]]:
     """Returns a list of words which start with the same letters as the passed word."""
     if common_letters < MIN_COMMON_START_FOR_AUTOCOMPLETE:
         # End of recursion, no common words found.
@@ -89,6 +91,7 @@ def bad_autocompletes(word: str,
 
 class CorruptionType(enum.Enum):
     """The four different corruption types, imitating natural corruptions."""
+
     TYPO = 0
     """Randomly replaced single chars. Imitates human typos."""
     SYNONYM = 1
@@ -115,6 +118,7 @@ def _get_rng(seed):
 @dataclasses.dataclass
 class CorruptionWeights:
     """Configuration of the weights of the different corruption types."""
+
     typo_weight: float = 0.05
     autocomplete_weight: float = 0.30
     autocorrect_weight: float = 0.30
@@ -124,18 +128,25 @@ class CorruptionWeights:
         return hash(tuple(dataclasses.asdict(self).values()))
 
 
-def _generate_corruption_types(seed: int,
-                               num_words: int,
-                               weights: CorruptionWeights,
-                               ) -> List[CorruptionType]:
+def _generate_corruption_types(
+    seed: int,
+    num_words: int,
+    weights: CorruptionWeights,
+) -> List[CorruptionType]:
     """A list of randomly chosen corruption types"""
-    weights = np.array([weights.typo_weight,
-                        weights.autocomplete_weight,
-                        weights.autocorrect_weight,
-                        weights.synonym_weight])
+    weights = np.array(
+        [
+            weights.typo_weight,
+            weights.autocomplete_weight,
+            weights.autocorrect_weight,
+            weights.synonym_weight,
+        ]
+    )
     normalized_weights = weights / weights.sum()
     rng = _get_rng(seed)
-    return [CorruptionType(rng.choice(4, p=normalized_weights)) for _ in range(num_words)]
+    return [
+        CorruptionType(rng.choice(4, p=normalized_weights)) for _ in range(num_words)
+    ]
 
 
 def _hash_text_to_int(words: List[str]) -> int:
@@ -147,24 +158,30 @@ def _hash_text_to_int(words: List[str]) -> int:
 
 
 def _hash_text_to_str(words: List[str]) -> str:
-    return hashlib.md5(" ".join(words).encode('utf-8')).hexdigest()
+    return hashlib.md5(" ".join(words).encode("utf-8")).hexdigest()
 
 
 class TextCorruptor(object):
     """A class for corrupting arbitrary english (not just imdb) text datasets."""
 
-    def __init__(self,
-                 base_dataset: List[str],
-                 cache_dir: Optional[str] = DEFAULT_CACHE_DIR,
-                 dictionary_size: int = 4000,
-                 clear_cache: bool = False):
+    def __init__(
+        self,
+        base_dataset: List[str],
+        cache_dir: Optional[str] = DEFAULT_CACHE_DIR,
+        dictionary_size: int = 4000,
+        clear_cache: bool = False,
+    ):
         if cache_dir is DEFAULT_CACHE_DIR:
-            warnings.warn("Using default cache directory, which is probably not what you want. "
-                          "Consider passing your own cache dir when creating a "
-                          "TextCorruptor instance. ")
+            warnings.warn(
+                "Using default cache directory, which is probably not what you want. "
+                "Consider passing your own cache dir when creating a "
+                "TextCorruptor instance. "
+            )
 
         # Identifier of passed dataset
-        self.base_ds_hash: str = _hash_text_to_str(base_dataset + [str(dictionary_size)])
+        self.base_ds_hash: str = _hash_text_to_str(
+            base_dataset + [str(dictionary_size)]
+        )
         # If cache dir is None: no caching
         self.cache_dir: Optional[str] = None
         if cache_dir is not None:
@@ -175,7 +192,9 @@ class TextCorruptor(object):
                 shutil.rmtree(self.cache_dir)
                 os.makedirs(self.cache_dir)
 
-        self.common_words: List[str] = self._extract_common_words(base_dataset, dictionary_size)
+        self.common_words: List[str] = self._extract_common_words(
+            base_dataset, dictionary_size
+        )
         self.start_bags: Dict[int, Dict[str, List[str]]] = self._word_start_bags()
         self.lev_dist: np.ndarray = self._calculate_distances()
         self.thesaurus: Dict[str, List[str]] = self.load_bad_translations()
@@ -187,7 +206,7 @@ class TextCorruptor(object):
             words_file = os.path.join(self.cache_dir, "common-words.pkl")
             if os.path.exists(words_file):
                 logging.info("Loading common words from cache")
-                with open(words_file, 'rb') as f:
+                with open(words_file, "rb") as f:
                     return pickle.load(f)
         logging.info("Extracting common words")
 
@@ -204,7 +223,9 @@ class TextCorruptor(object):
         logging.debug("[WORD EXTRACTION] Removing numbers")
         words = [w for w in words if not w.isdigit()]
         # Remove words which do not contain any letters
-        logging.debug("[WORD EXTRACTION] Removing words which do not contain any letters")
+        logging.debug(
+            "[WORD EXTRACTION] Removing words which do not contain any letters"
+        )
         words = [w for w in words if any(c.isalpha() for c in w)]
         # Chose most frequent words
         logging.debug("[WORD EXTRACTION] Choosing most frequent words")
@@ -217,7 +238,7 @@ class TextCorruptor(object):
         logging.info("Finished extracting common words from imdb")
 
         if self.cache_dir is not None:
-            with open(words_file, 'wb') as f:
+            with open(words_file, "wb") as f:
                 pickle.dump(chosen_words, f)
 
         return chosen_words
@@ -231,7 +252,7 @@ class TextCorruptor(object):
             words_bags_file = os.path.join(self.cache_dir, "word-start-bags.pkl")
             if os.path.exists(words_bags_file):
                 logging.info("Loading word-start-bags from cache")
-                with open(words_bags_file, 'rb') as f:
+                with open(words_bags_file, "rb") as f:
                     return pickle.load(f)
 
         def _group(num_start_chars: int) -> Dict[str, List[str]]:
@@ -245,13 +266,18 @@ class TextCorruptor(object):
             return dict_res
 
         with ThreadPoolExecutor() as executor:
-            start_sizes = list(range(MIN_COMMON_START_FOR_AUTOCOMPLETE, MAX_COMMON_START_FOR_AUTOCOMPLETE + 1))
+            start_sizes = list(
+                range(
+                    MIN_COMMON_START_FOR_AUTOCOMPLETE,
+                    MAX_COMMON_START_FOR_AUTOCOMPLETE + 1,
+                )
+            )
             dicts = list(executor.map(_group, start_sizes))
 
         result = {start_sizes[i]: dicts[i] for i in range(len(start_sizes))}
 
         if self.cache_dir is not None:
-            with open(words_bags_file, 'wb') as f:
+            with open(words_bags_file, "wb") as f:
                 pickle.dump(result, f)
 
         return result
@@ -271,9 +297,13 @@ class TextCorruptor(object):
         # Note: Runtime could further be improved by leveraging the symmetry in the distance matrix.
         #       At the moment, every entry is calculated twice.
         with ThreadPoolExecutor() as executor:
-            distances = list(tqdm(executor.map(_run_for_word, self.common_words),
-                                  total=len(self.common_words),
-                                  desc="Calculating Levenshtein distances"))
+            distances = list(
+                tqdm(
+                    executor.map(_run_for_word, self.common_words),
+                    total=len(self.common_words),
+                    desc="Calculating Levenshtein distances",
+                )
+            )
 
         distances = np.array(distances, dtype=np.uint8)
         if self.cache_dir is not None:
@@ -281,13 +311,14 @@ class TextCorruptor(object):
 
         return distances
 
-    def corrupt(self,
-                texts: List[str],
-                severity: float,
-                seed: int,
-                weights: Optional[CorruptionWeights] = None,
-                force_recalculate: bool = False
-                ) -> List[str]:
+    def corrupt(
+        self,
+        texts: List[str],
+        severity: float,
+        seed: int,
+        weights: Optional[CorruptionWeights] = None,
+        force_recalculate: bool = False,
+    ) -> List[str]:
         """Corrupts a dataset consisting of a list of strings (texts).
 
         The generation is set up such that:
@@ -318,18 +349,18 @@ class TextCorruptor(object):
 
         """
 
-        assert 0 <= severity <= 1., "Severity must be between 0 and 1."
+        assert 0 <= severity <= 1.0, "Severity must be between 0 and 1."
 
         if self.cache_dir is not None:
             ds_hash = _hash_text_to_str(texts)
             cache_file = os.path.join(
                 self.cache_dir,
                 "corrupted",
-                f"{ds_hash}-{hash(weights)}-{severity}-{seed}.pkl"
+                f"{ds_hash}-{hash(weights)}-{severity}-{seed}.pkl",
             )
             if os.path.exists(cache_file) and not force_recalculate:
                 logging.info("Loading corrupted dataset from cache")
-                with open(cache_file, 'rb') as f:
+                with open(cache_file, "rb") as f:
                     return pickle.load(f)
 
         if weights is None:
@@ -348,10 +379,12 @@ class TextCorruptor(object):
             #   Hence, higher severity will lead to the same, but more corruptions.
             #   We do this by choosing a corruption type for each word,
             #   and only then deciding which of these corruptions should be applied based on severity.
-            corruption_types = _generate_corruption_types(sentence_seed, len(words), weights)
+            corruption_types = _generate_corruption_types(
+                sentence_seed, len(words), weights
+            )
             corruption_indexes = np.arange(len(words))
             _get_rng(sentence_seed).shuffle(corruption_indexes)
-            corruption_indexes = corruption_indexes[:round(len(words) * severity)]
+            corruption_indexes = corruption_indexes[: round(len(words) * severity)]
 
             for i, word in enumerate(words):
                 if np.sum(corruption_indexes == i) == 0 or len(word) < 2:
@@ -368,13 +401,16 @@ class TextCorruptor(object):
 
         texts_as_words = split_by_whitespace(texts)
         corrupted_texts = []
-        for i, text in tqdm(enumerate(texts_as_words), total=len(texts_as_words),
-                            desc="Corrupting dataset badges"):
+        for i, text in tqdm(
+            enumerate(texts_as_words),
+            total=len(texts_as_words),
+            desc="Corrupting dataset badges",
+        ):
             corrupted_texts.append(_corrupt_single_text(text))
 
         if self.cache_dir is not None:
             os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-            with open(cache_file, 'wb') as f:
+            with open(cache_file, "wb") as f:
                 pickle.dump(corrupted_texts, f)
 
         return corrupted_texts
@@ -388,7 +424,9 @@ class TextCorruptor(object):
             thesaurus_path = os.path.join(self.cache_dir, "bad_translations.pkl")
         else:
             random_str = _get_rng(None).choice(string.ascii_letters, size=10)
-            thesaurus_path = os.path.join(tempfile.gettempdir(), f"bad_translations_{random_str}.pkl")
+            thesaurus_path = os.path.join(
+                tempfile.gettempdir(), f"bad_translations_{random_str}.pkl"
+            )
 
         # Download file if not exists
         if not os.path.isfile(thesaurus_path):
@@ -401,8 +439,8 @@ class TextCorruptor(object):
         # Get simple bags of synonyms
         result = dict()
         for d in data:
-            word = d['word']
-            synonyms = d['synonyms']
+            word = d["word"]
+            synonyms = d["synonyms"]
             if len(synonyms) > 1:
                 if word not in result:
                     result[word] = set()
@@ -418,9 +456,11 @@ class TextCorruptor(object):
         letter_index = seed % len(text)
         candidate_letters = string.ascii_lowercase.replace(text[letter_index], "")
         # MD4 hash is faster than RNG and random enough
-        random_candidate_index = _hash_text_to_int([text, str(seed)]) % len(candidate_letters)
+        random_candidate_index = _hash_text_to_int([text, str(seed)]) % len(
+            candidate_letters
+        )
         typo = candidate_letters[random_candidate_index]
-        return text[:letter_index] + typo + text[letter_index + 1:]
+        return text[:letter_index] + typo + text[letter_index + 1 :]
 
     def _corrupt_autocomplete(self, word, seed: int) -> str:
         candidates = bad_autocompletes(word, self.start_bags, common_letters=5)
@@ -439,7 +479,9 @@ class TextCorruptor(object):
         candidate_indices = np.argsort(self.lev_dist[word_index])[1:6]
         candidate_distances = 1 / self.lev_dist[word_index][candidate_indices]
         rng = _get_rng(seed)
-        chosen_index = rng.choice(candidate_indices, p=candidate_distances / candidate_distances.sum())
+        chosen_index = rng.choice(
+            candidate_indices, p=candidate_distances / candidate_distances.sum()
+        )
         return self.common_words[chosen_index]
 
     def _corrupt_synonym(self, word, seed: int) -> str:
@@ -453,7 +495,9 @@ class TextCorruptor(object):
 
         # MD4 hash is faster than RNG and random enough
         method_salt = "_corrupt_synonym"
-        random_candidate_index = _hash_text_to_int([word, str(seed), method_salt]) % len(synonyms)
+        random_candidate_index = _hash_text_to_int(
+            [word, str(seed), method_salt]
+        ) % len(synonyms)
         # Choose a synonym at random
         return synonyms[random_candidate_index]
 
@@ -470,14 +514,18 @@ class TextCorruptor(object):
             raise ValueError(f"Unknown corruption type: {corruption_type}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    nominal_train = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='train')['text']
-    nominal_test = load_dataset('imdb', cache_dir="/expext2/deepgini/.external_datasets", split='test')['text']
-    corruptor = TextCorruptor(base_dataset=nominal_test + nominal_train, cache_dir=".imdb_test")
+    nominal_train = load_dataset(
+        "imdb", cache_dir="/expext2/deepgini/.external_datasets", split="train"
+    )["text"]
+    nominal_test = load_dataset(
+        "imdb", cache_dir="/expext2/deepgini/.external_datasets", split="test"
+    )["text"]
+    corruptor = TextCorruptor(
+        base_dataset=nominal_test + nominal_train, cache_dir=".imdb_test"
+    )
 
     # Run only on a part of the dataset
     # nominal_test = nominal_test[:201]
-    imdb_corrupted = corruptor.corrupt(
-        nominal_test, severity=0.5, seed=1
-    )
+    imdb_corrupted = corruptor.corrupt(nominal_test, severity=0.5, seed=1)

@@ -224,6 +224,5 @@ In May 2020 it was reported by Gay Star News that a 12-foot (3.7 m) high steel s
 _clean_text = _turing_wikipedia_article.split("\n")
 _clean_text = [x for x in _clean_text if x != ""]
 
-SMALL_TRAIN_DATA = _clean_text[:int(len(_clean_text) * 0.8)]
-SMALL_TEST_DATA = _clean_text[int(len(_clean_text) * 0.8):]
-
+SMALL_TRAIN_DATA = _clean_text[: int(len(_clean_text) * 0.8)]
+SMALL_TEST_DATA = _clean_text[int(len(_clean_text) * 0.8) :]
