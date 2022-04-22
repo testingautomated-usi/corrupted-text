@@ -6,6 +6,7 @@
 [![Docstr-Coverage](https://badgen.net/badge/docstr-coverage/100%25/green?cache=30)](https://github.com/HunterMcGushion/docstr_coverage)
 [![Python Version](https://img.shields.io/pypi/pyversions/corrupted-text)](https://img.shields.io/pypi/pyversions/corrupted-text)
 [![PyPi Deployment](https://badgen.net/pypi/v/corrupted-text?cache=30)](https://pypi.org/project/corrupted-text/)
+[![DOI](https://zenodo.org/badge/478863947.svg)](https://zenodo.org/badge/latestdoi/478863947)
 
 A python library to generate out-of-distribution text datasets.
 Specifically, the library applies **model-independent**, **commonplace corruptions** 
